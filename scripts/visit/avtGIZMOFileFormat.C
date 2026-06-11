@@ -255,7 +255,7 @@ avtGIZMOFileFormat::ReadHeader() {
     attr_id = H5Aopen(group_id, "OmegaMatter", H5P_DEFAULT);
     if (attr_id > -1) {
       MYH5CHECK(attr_id);
-      ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.OmegaMatter);
+      ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.Omega_Matter);
       MYH5CHECK(ierr);
       H5Aclose(attr_id);
     } else {
@@ -266,7 +266,7 @@ avtGIZMOFileFormat::ReadHeader() {
     attr_id = H5Aopen(group_id, "OmegaLambda", H5P_DEFAULT);
     if (attr_id > -1){
       MYH5CHECK(attr_id);
-      ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.OmegaLambda);
+      ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.Omega_Lambda);
       MYH5CHECK(ierr);
       H5Aclose(attr_id);
     } else {
