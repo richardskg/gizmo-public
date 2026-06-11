@@ -40,7 +40,10 @@
 #include <avtGIZMOFileFormat.h>
 #include <avtSTSDFileFormatInterface.h>
 #include <avtGenericDatabase.h>
-#include <allvars.h>
+
+// #include <allvars.h>, not in search path. Here is the definition we need
+// Check allvars.h to see the real definition along with the #ifdef
+typedef  long long integertime;
 // ****************************************************************************
 //  Method:  GIZMOCommonPluginInfo::GetDatabaseType
 //
