@@ -40,7 +40,7 @@
 #include <avtGIZMOFileFormat.h>
 #include <avtSTSDFileFormatInterface.h>
 #include <avtGenericDatabase.h>
-
+#include <allvars.h>
 // ****************************************************************************
 //  Method:  GIZMOCommonPluginInfo::GetDatabaseType
 //

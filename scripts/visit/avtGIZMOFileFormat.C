@@ -253,16 +253,26 @@ avtGIZMOFileFormat::ReadHeader() {
         &header.num_part_total_high_word[0]); MYH5CHECK(ierr);
 
     attr_id = H5Aopen(group_id, "OmegaMatter", H5P_DEFAULT);
+    if (attr_id > -1) {
       MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.OmegaMatter);
+      ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.OmegaMatter);
       MYH5CHECK(ierr);
-    H5Aclose(attr_id);
+      H5Aclose(attr_id);
+    } else {
+      // This means the attribute is missing from the header. Assume it's not needed
+      cout << "avtGIZMOFileFormat.C OmegaMatter attr_id expected >= 0, actually = " << attr_id << endl;
+    }
 
     attr_id = H5Aopen(group_id, "OmegaLambda", H5P_DEFAULT);
+    if (attr_id > -1){
       MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.OmegaLambda);
+      ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.OmegaLambda);
       MYH5CHECK(ierr);
-    H5Aclose(attr_id);
+      H5Aclose(attr_id);
+    } else {
+      // This means the attribute is missing from the header. Assume it's not needed
+      cout << "avtGIZMOFileFormat.C OmegaLambda attr_id expected >= 0, actually = " << attr_id << endl;
+    }
 
     attr_id = H5Aopen(group_id, "Redshift", H5P_DEFAULT);
       MYH5CHECK(attr_id);
