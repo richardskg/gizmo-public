@@ -1,3 +1,9 @@
+# Don't submit the .gitignore file, it may cause problems for other users.
+# Submit the gitignore.sample file
+.gitignore
 *.o
 output/
 *.make
+scripts/visit/build/
+CMakeLists.txt
+

@@ -47,6 +47,8 @@
 #include <avtSTSDFileFormat.h>
 
 #include <list>
+#include <hdf5.h>
+
 
 #ifndef GIZMO_N_PTYPE
 #define GIZMO_N_PTYPE 6
@@ -73,7 +75,7 @@ class avtGIZMOFileFormat : public avtSTSDFileFormat
     void              Initialize();
     void              ReadHeader();
     void              ReadMetadata();
-
+    void              H5ReadIfAvailable(hid_t group_id, const char *attr_name, hid_t type_id, void *buf);
     //
     // This is used to return unconvention data -- ranging from material
     // information to information about block connectivity.
