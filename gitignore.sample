@@ -1,0 +1,11 @@
+# This is a simple sample gitignore file. Copy it to .gitignore and then change to meet your needs.
+
+# Don't submit the .gitignore file, it may cause problems for other users.
+# Submit the gitignore.sample file
+.gitignore
+*.o
+output/
+*.make
+scripts/visit/build/
+CMakeLists.txt
+
