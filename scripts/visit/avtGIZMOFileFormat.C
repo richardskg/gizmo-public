@@ -163,12 +163,11 @@ avtGIZMOFileFormat::Initialize() {
 //
 // ****************************************************************************
 
-void avtGIZMOFileFormat::H5ReadIfAvailable(hid_t group_id, const char *attr_name, hid_t type_id, void *buf)
-{
+void avtGIZMOFileFormat::H5ReadIfAvailable(hid_t group_id, const char *attr_name, hid_t type_id, void *buf) {
   hid_t attr_id;
   herr_t ierr;
   htri_t exists = H5Aexists(group_id, attr_name);
-  cout << " H5ReadIfAvailable, attr_name: " << attr_name << " H5Aexists returned: " << exists << endl;
+  debug4 << " H5ReadIfAvailable, attr_name: " << attr_name << " H5Aexists returned: " << exists << endl;
   if (exists > 0) {
     attr_id = H5Aopen(group_id, attr_name, H5P_DEFAULT);
     if (attr_id > -1)
@@ -181,7 +180,7 @@ void avtGIZMOFileFormat::H5ReadIfAvailable(hid_t group_id, const char *attr_name
     {
       // This means the attribute is missing from the header. Assume it's not needed.
       // Visit seems to always warn about the missing header when we try to read, so always output this line.
-      cout << "avtGIZMOFileFormat.C. Missing header attribute: " << attr_name << " This is expected behavior if this header was not used." << endl;
+      debug4 << "avtGIZMOFileFormat.C. Missing header attribute: " << attr_name << " This is expected behavior if this header was not used." << endl;
     }
   }
 }
@@ -210,135 +209,23 @@ avtGIZMOFileFormat::ReadHeader() {
     herr_t ierr;
 
     H5ReadIfAvailable(group_id, "BoxSize", H5T_NATIVE_DOUBLE, &header.box_size);
-
-    // attr_id = H5Aopen(group_id, "BoxSize", H5P_DEFAULT); MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.box_size);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "Flag_Cooling", H5T_NATIVE_INT, &header.flag_cooling);
-
-    // attr_id = H5Aopen(group_id, "Flag_Cooling", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_cooling);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "Flag_DoublePrecision", H5T_NATIVE_INT, &header.flag_double_precision);
-    // attr_id = H5Aopen(group_id, "Flag_DoublePrecision", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_double_precision);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "Flag_Feedback", H5T_NATIVE_INT, &header.flag_feedback);
-    // attr_id = H5Aopen(group_id, "Flag_Feedback", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_feedback);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "Flag_IC_Info", H5T_NATIVE_INT, &header.flag_ic_info);
-    // attr_id = H5Aopen(group_id, "Flag_IC_Info", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_ic_info);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "Flag_Metals", H5T_NATIVE_INT, &header.flag_metals);
-    // attr_id = H5Aopen(group_id, "Flag_Metals", H5P_DEFAULT); MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_metals);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "Flag_Sfr", H5T_NATIVE_INT, &header.flag_sfr);
-    // attr_id = H5Aopen(group_id, "Flag_Sfr", H5P_DEFAULT); MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_sfr);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "Flag_StellarAge", H5T_NATIVE_INT, &header.flag_stellar_age);
-    // attr_id = H5Aopen(group_id, "Flag_StellarAge", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_stellar_age);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "HubbleParam", H5T_NATIVE_DOUBLE, &header.hubble_param);
-    // attr_id = H5Aopen(group_id, "HubbleParam", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.hubble_param);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "MassTable", H5T_NATIVE_DOUBLE, &header.mass_table[0]);
-    // attr_id = H5Aopen(group_id, "MassTable", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.mass_table[0]);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "NumFilesPerSnapshot", H5T_NATIVE_INT, &header.num_files_per_snapshot);
-    // attr_id = H5Aopen(group_id, "NumFilesPerSnapshot", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.num_files_per_snapshot);
-    //   MYH5CHECK(ierr);
-
     H5ReadIfAvailable(group_id, "NumPart_ThisFile", H5T_NATIVE_INT, &header.num_part_this_file[0]);
-    // attr_id = H5Aopen(group_id, "NumPart_ThisFile", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.num_part_this_file[0]);
-    //   MYH5CHECK(ierr);
-
     H5ReadIfAvailable(group_id, "NumPart_Total", H5T_NATIVE_UINT, &header.num_part_total[0]);
-    // attr_id = H5Aopen(group_id, "NumPart_Total", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_UINT, &header.num_part_total[0]);
-    //   MYH5CHECK(ierr);
-
     H5ReadIfAvailable(group_id, "NumPart_Total_HighWord", H5T_NATIVE_UINT, &header.num_part_total_high_word[0]);
-    // attr_id = H5Aopen(group_id, "NumPart_Total_HighWord", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_UINT,
-    //     &header.num_part_total_high_word[0]); MYH5CHECK(ierr);
-
     H5ReadIfAvailable(group_id, "OmegaMatter", H5T_NATIVE_DOUBLE, &header.Omega_Matter);
-    // attr_id = H5Aopen(group_id, "OmegaMatter", H5P_DEFAULT);
-    // if (attr_id > -1) {
-    //   MYH5CHECK(attr_id);
-    //   ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.Omega_Matter);
-    //   MYH5CHECK(ierr);
-    //   H5Aclose(attr_id);
-    // } else {
-    //   // This means the attribute is missing from the header. Assume it's not needed
-    //   cout << "avtGIZMOFileFormat.C OmegaMatter attr_id expected >= 0, actually = " << attr_id << endl;
-    // }
-
     H5ReadIfAvailable(group_id, "OmegaLambda", H5T_NATIVE_DOUBLE, &header.Omega_Lambda);
-    // attr_id = H5Aopen(group_id, "OmegaLambda", H5P_DEFAULT);
-    // if (attr_id > -1){
-    //   MYH5CHECK(attr_id);
-    //   ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.Omega_Lambda);
-    //   MYH5CHECK(ierr);
-    //   H5Aclose(attr_id);
-    // } else {
-    //   // This means the attribute is missing from the header. Assume it's not needed
-    //   cout << "avtGIZMOFileFormat.C OmegaLambda attr_id expected >= 0, actually = " << attr_id << endl;
-    // }
-
     H5ReadIfAvailable(group_id, "Redshift", H5T_NATIVE_DOUBLE, &header.redshift);
-    // attr_id = H5Aopen(group_id, "Redshift", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.redshift);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
-
     H5ReadIfAvailable(group_id, "Time", H5T_NATIVE_DOUBLE, &header.time);
-    // attr_id = H5Aopen(group_id, "Time", H5P_DEFAULT);
-    //   MYH5CHECK(attr_id);
-    // ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.time);
-    //   MYH5CHECK(ierr);
-    // H5Aclose(attr_id);
 
     H5Gclose(group_id);
     H5Fclose(file_id);
