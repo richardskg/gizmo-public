@@ -77,7 +77,7 @@
 #define debug4 std::cout
 #define MYH5CHECK(X) if((X) < 0) assert(false)
 
-#else 
+#else
 
 #define MYH5CHECK(X) if((X) < 0) \
         EXCEPTION1(InvalidDBTypeException, "The file could not be opened")
@@ -152,6 +152,38 @@ avtGIZMOFileFormat::Initialize() {
   }
 }
 
+// ****************************************************************************
+//  Method: avtGIZMOFileFormat::H5ReadIfAvailable
+//
+//  Purpose:
+//      Read a given header. If it is not found, log the missing header but do not fail.
+//
+//  Programmer: Ken Richards
+//  Creation:   Fri Jun 19 2026
+//
+// ****************************************************************************
+
+void avtGIZMOFileFormat::H5ReadIfAvailable(hid_t group_id, const char *attr_name, hid_t type_id, void *buf) {
+  hid_t attr_id;
+  herr_t ierr;
+  htri_t exists = H5Aexists(group_id, attr_name);
+  debug4 << " H5ReadIfAvailable, attr_name: " << attr_name << " H5Aexists returned: " << exists << endl;
+  if (exists > 0) {
+    attr_id = H5Aopen(group_id, attr_name, H5P_DEFAULT);
+    if (attr_id > -1)
+    {
+      ierr = H5Aread(attr_id, type_id, buf);
+      MYH5CHECK(ierr);
+      H5Aclose(attr_id);
+    }
+    else
+    {
+      // This means the attribute is missing from the header. Assume it's not needed.
+      // Visit seems to always warn about the missing header when we try to read, so always output this line.
+      debug4 << "avtGIZMOFileFormat.C. Missing header attribute: " << attr_name << " This is expected behavior if this header was not used." << endl;
+    }
+  }
+}
 
 // ****************************************************************************
 //  Method: avtGIZMOFileFormat::ReadHeader
@@ -166,6 +198,7 @@ avtGIZMOFileFormat::Initialize() {
 
 void
 avtGIZMOFileFormat::ReadHeader() {
+  cout << "Readheader" <<endl;
   if(!initialized) {
     debug4 << "Reading the header ..." << endl;
     hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -175,116 +208,24 @@ avtGIZMOFileFormat::ReadHeader() {
     hid_t attr_id;
     herr_t ierr;
 
-    attr_id = H5Aopen(group_id, "BoxSize", H5P_DEFAULT); MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.box_size);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "Flag_Cooling", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_cooling);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "Flag_DoublePrecision", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_double_precision);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "Flag_Feedback", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_feedback);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "Flag_IC_Info", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_ic_info);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "Flag_Metals", H5P_DEFAULT); MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_metals);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "Flag_Sfr", H5P_DEFAULT); MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_sfr);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "Flag_StellarAge", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.flag_stellar_age);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "HubbleParam", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.hubble_param);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "MassTable", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.mass_table[0]);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "NumFilesPerSnapshot", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.num_files_per_snapshot);
-      MYH5CHECK(ierr);
-
-    attr_id = H5Aopen(group_id, "NumPart_ThisFile", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_INT, &header.num_part_this_file[0]);
-      MYH5CHECK(ierr);
-
-    attr_id = H5Aopen(group_id, "NumPart_Total", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_UINT, &header.num_part_total[0]);
-      MYH5CHECK(ierr);
-
-    attr_id = H5Aopen(group_id, "NumPart_Total_HighWord", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_UINT,
-        &header.num_part_total_high_word[0]); MYH5CHECK(ierr);
-
-    attr_id = H5Aopen(group_id, "OmegaMatter", H5P_DEFAULT);
-    if (attr_id > -1) {
-      MYH5CHECK(attr_id);
-      ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.Omega_Matter);
-      MYH5CHECK(ierr);
-      H5Aclose(attr_id);
-    } else {
-      // This means the attribute is missing from the header. Assume it's not needed
-      cout << "avtGIZMOFileFormat.C OmegaMatter attr_id expected >= 0, actually = " << attr_id << endl;
-    }
-
-    attr_id = H5Aopen(group_id, "OmegaLambda", H5P_DEFAULT);
-    if (attr_id > -1){
-      MYH5CHECK(attr_id);
-      ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.Omega_Lambda);
-      MYH5CHECK(ierr);
-      H5Aclose(attr_id);
-    } else {
-      // This means the attribute is missing from the header. Assume it's not needed
-      cout << "avtGIZMOFileFormat.C OmegaLambda attr_id expected >= 0, actually = " << attr_id << endl;
-    }
-
-    attr_id = H5Aopen(group_id, "Redshift", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.redshift);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
-
-    attr_id = H5Aopen(group_id, "Time", H5P_DEFAULT);
-      MYH5CHECK(attr_id);
-    ierr = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &header.time);
-      MYH5CHECK(ierr);
-    H5Aclose(attr_id);
+    H5ReadIfAvailable(group_id, "BoxSize", H5T_NATIVE_DOUBLE, &header.box_size);
+    H5ReadIfAvailable(group_id, "Flag_Cooling", H5T_NATIVE_INT, &header.flag_cooling);
+    H5ReadIfAvailable(group_id, "Flag_DoublePrecision", H5T_NATIVE_INT, &header.flag_double_precision);
+    H5ReadIfAvailable(group_id, "Flag_Feedback", H5T_NATIVE_INT, &header.flag_feedback);
+    H5ReadIfAvailable(group_id, "Flag_IC_Info", H5T_NATIVE_INT, &header.flag_ic_info);
+    H5ReadIfAvailable(group_id, "Flag_Metals", H5T_NATIVE_INT, &header.flag_metals);
+    H5ReadIfAvailable(group_id, "Flag_Sfr", H5T_NATIVE_INT, &header.flag_sfr);
+    H5ReadIfAvailable(group_id, "Flag_StellarAge", H5T_NATIVE_INT, &header.flag_stellar_age);
+    H5ReadIfAvailable(group_id, "HubbleParam", H5T_NATIVE_DOUBLE, &header.hubble_param);
+    H5ReadIfAvailable(group_id, "MassTable", H5T_NATIVE_DOUBLE, &header.mass_table[0]);
+    H5ReadIfAvailable(group_id, "NumFilesPerSnapshot", H5T_NATIVE_INT, &header.num_files_per_snapshot);
+    H5ReadIfAvailable(group_id, "NumPart_ThisFile", H5T_NATIVE_INT, &header.num_part_this_file[0]);
+    H5ReadIfAvailable(group_id, "NumPart_Total", H5T_NATIVE_UINT, &header.num_part_total[0]);
+    H5ReadIfAvailable(group_id, "NumPart_Total_HighWord", H5T_NATIVE_UINT, &header.num_part_total_high_word[0]);
+    H5ReadIfAvailable(group_id, "OmegaMatter", H5T_NATIVE_DOUBLE, &header.Omega_Matter);
+    H5ReadIfAvailable(group_id, "OmegaLambda", H5T_NATIVE_DOUBLE, &header.Omega_Lambda);
+    H5ReadIfAvailable(group_id, "Redshift", H5T_NATIVE_DOUBLE, &header.redshift);
+    H5ReadIfAvailable(group_id, "Time", H5T_NATIVE_DOUBLE, &header.time);
 
     H5Gclose(group_id);
     H5Fclose(file_id);
@@ -315,7 +256,7 @@ avtGIZMOFileFormat::ReadMetadata() {
       if(header.num_part_this_file[ptype] > 0) {
         char gname[GIZMO_STRLEN];
         snprintf(gname, GIZMO_STRLEN, "PartType%d", ptype);
-        debug4 << "\t/" << string(gname) << endl; 
+        debug4 << "\t/" << string(gname) << endl;
         void * metadata = reinterpret_cast<void *>(&fields[ptype]);
         herr_t ierr = H5Giterate(file_id, gname, NULL, gizmo_read_metadata,
            metadata); MYH5CHECK(file_id);
